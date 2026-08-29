@@ -4,7 +4,7 @@ It's all about pixels
 
 Smart Image Scanner Browser Extension
 
-Pixel Shift is a simple and powerful browser extension that helps users scan and analyze images directly from webpages.
+Pixel Shift is a simple and powerful browser extension that helps users scan, analyze and convert images directly from webpages.
 
 It is designed to make image-related tasks faster, easier, and more convenient.
 
@@ -12,7 +12,7 @@ It is designed to make image-related tasks faster, easier, and more convenient.
 ✨ Features
 
 - 🔍 Scan images from webpages
-- 🖼️ Analyze images easily
+- 🖼️ Analyze and convert images easily
 - ⚡ Fast and lightweight
 - 🎨 Clean and simple interface
 - 🌐 Works as a browser extension
@@ -48,12 +48,8 @@ npm run build
 
 🌐 Install the Extension
 
-1. Build the project.
-2. Open your browser's extension settings.
-3. Turn on Developer Mode.
-4. Select Load unpacked.
-5. Select the generated build folder.
-6. Pixel Shift is ready to use! 🚀
+1. Add the extension to chrome. 😊
+2. When on a webpage, click on the extension and pixelShift is at your service. 🫡
 
 
 📌 Project Status
