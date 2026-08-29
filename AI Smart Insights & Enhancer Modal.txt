@@ -1,0 +1,153 @@
+import React, { useState } from 'react';
+import { ImageMetadata, SupportedFormat } from '../types';
+import { analyzeImageWithAI, AIAnalysisResult } from '../services/aiService';
+
+interface AIEnhanceModalProps {
+  image: ImageMetadata;
+  isOpen: boolean;
+  onClose: () => void;
+  onApplyInsights: (insights: { fileName: string; format: SupportedFormat; altText: string }) => void;
+}
+
+export const AIEnhanceModal: React.FC<AIEnhanceModalProps> = ({
+  image,
+  isOpen,
+  onClose,
+  onApplyInsights,
+}) => {
+  const [loading, setLoading] = useState(false);
+  const [analysis, setAnalysis] = useState<AIAnalysisResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  if (!isOpen) return null;
+
+  const handleAnalyze = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await analyzeImageWithAI(image.src);
+      setAnalysis(result);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'AI analysis failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleApply = () => {
+    if (!analysis) return;
+    onApplyInsights({
+      fileName: analysis.suggestedFileName,
+      format: (analysis.recommendedFormat as SupportedFormat) || 'webp',
+      altText: analysis.altText,
+    });
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+      <div className="w-full max-w-lg rounded-2xl bg-slate-900 border border-slate-800 p-6 shadow-2xl flex flex-col gap-4 text-slate-200">
+        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div className="flex items-center gap-2">
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-500/20 text-indigo-400 font-bold text-xs">
+              AI
+            </span>
+            <h3 className="text-base font-semibold text-white">Smart Image Insights</h3>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-slate-400 hover:text-white text-sm"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div className="flex items-center gap-4 bg-slate-950 p-3 rounded-xl border border-slate-800/60">
+          <img
+            src={image.src}
+            alt={image.fileName}
+            className="w-16 h-16 object-cover rounded-lg border border-slate-800"
+          />
+          <div className="flex flex-col text-xs gap-0.5">
+            <span className="font-medium text-white truncate max-w-[280px]">{image.fileName}</span>
+            <span className="text-slate-400">
+              {image.width} × {image.height} px • {image.originalFormat.toUpperCase()}
+            </span>
+          </div>
+        </div>
+
+        {!analysis && !loading && (
+          <div className="py-6 text-center flex flex-col items-center gap-3">
+            <p className="text-xs text-slate-400 max-w-sm">
+              Use Gemini Multimodal AI to generate descriptive SEO alt-text, intelligent slug names, and format recommendations.
+            </p>
+            <button
+              onClick={handleAnalyze}
+              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold shadow-lg shadow-indigo-600/30 transition-all"
+            >
+              Analyze with Gemini AI
+            </button>
+          </div>
+        )}
+
+        {loading && (
+          <div className="py-8 flex flex-col items-center justify-center gap-3">
+            <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+            <span className="text-xs text-slate-400">Analyzing visual layers...</span>
+          </div>
+        )}
+
+        {error && (
+          <div className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-xl text-rose-400 text-xs">
+            {error}
+          </div>
+        )}
+
+        {analysis && (
+          <div className="flex flex-col gap-3 text-xs">
+            <div className="bg-slate-950/80 p-3 rounded-xl border border-slate-800 space-y-2">
+              <div>
+                <span className="text-slate-400 block text-[10px] uppercase font-semibold">Suggested Name</span>
+                <span className="text-indigo-300 font-mono font-medium">{analysis.suggestedFileName}</span>
+              </div>
+              <div>
+                <span className="text-slate-400 block text-[10px] uppercase font-semibold">Recommended Format</span>
+                <span className="text-emerald-400 font-bold uppercase">{analysis.recommendedFormat}</span>
+                <span className="text-slate-400 text-[11px] block mt-0.5">{analysis.formatReason}</span>
+              </div>
+              <div>
+                <span className="text-slate-400 block text-[10px] uppercase font-semibold">SEO Alt Text</span>
+                <p className="text-slate-300 italic">{analysis.altText}</p>
+              </div>
+              <div>
+                <span className="text-slate-400 block text-[10px] uppercase font-semibold mb-1">Tags</span>
+                <div className="flex flex-wrap gap-1">
+                  {analysis.tags.map((tag) => (
+                    <span key={tag} className="px-2 py-0.5 bg-slate-800 text-slate-300 rounded text-[10px]">
+                      #{tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                onClick={onClose}
+                className="px-3 py-1.5 rounded-lg text-slate-400 hover:text-white text-xs"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleApply}
+                className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold transition-all shadow-md shadow-emerald-600/20"
+              >
+                Apply AI Suggestions
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
