@@ -1,0 +1,21 @@
+┌────────────────────────────────┐
+│      POPUP (popup.js)          │
+└──────┬──────────────────▲──────┘
+       │                  │
+ 1. SCAN_PAGE       2. Extracted Images & Page Title
+ (tabs.sendMessage)    (sendResponse)
+       │                  │
+┌──────▼──────────────────┴──────┐
+│  CONTENT SCRIPT (content.js)   │
+└────────────────────────────────┘
+
+┌────────────────────────────────┐
+│      POPUP (popup.js)          │
+└──────────────┬─────────────────┘
+               │
+         3. DOWNLOAD_IMAGE (DataURL blob + filename)
+            (runtime.sendMessage)
+               │
+┌──────────────▼─────────────────┐
+│ SERVICE WORKER (background.js) │ ──> triggers chrome.downloads.download()
+└────────────────────────────────┘
