@@ -1,0 +1,50 @@
+import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import { AppState, AppAction } from '../types/state';
+import { appReducer, initialAppState } from './AppReducer';
+
+interface AppContextValue {
+  state: AppState;
+  dispatch: React.Dispatch<AppAction>;
+}
+
+const AppContext = createContext<AppContextValue | null>(null);
+
+export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [state, dispatch] = useReducer(appReducer, initialAppState);
+
+  // Restore persistent preferences on initialization
+  useEffect(() => {
+    if (typeof chrome !== 'undefined' && chrome.storage?.local) {
+      chrome.storage.local.get(['pixelshift_preferences'], (res) => {
+        if (res.pixelshift_preferences) {
+          dispatch({
+            type: 'RESTORE_SAVED_PREFERENCES',
+            payload: res.pixelshift_preferences,
+          });
+        }
+      });
+    } else {
+      const saved = localStorage.getItem('pixelshift_preferences');
+      if (saved) {
+        try {
+          dispatch({
+            type: 'RESTORE_SAVED_PREFERENCES',
+            payload: JSON.parse(saved),
+          });
+        } catch {
+          // Ignore invalid JSON
+        }
+      }
+    }
+  }, []);
+
+  return <AppContext.Provider value={{ state, dispatch }}>{children}</AppContext.Provider>;
+};
+
+export function useApp(): AppContextValue {
+  const context = useContext(AppContext);
+  if (!context) {
+    throw new Error('useApp must be used within an AppProvider');
+  }
+  return context;
+}
