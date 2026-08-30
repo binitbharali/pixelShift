@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PixelShift</title>
+  <style>
+    body { width: 380px; min-height: 540px; margin: 0; padding: 14px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #090d16; color: #f8fafc; box-sizing: border-box; }
+    h1 { font-size: 17px; margin: 0 0 10px; display: flex; align-items: center; justify-content: space-between; color: #f8fafc; font-weight: 700; }
+    .brand { display: flex; align-items: center; gap: 6px; }
+    .badge { font-size: 10px; background: #1e293b; color: #94a3b8; padding: 2px 6px; border-radius: 4px; font-family: monospace; }
+    .btn-row { display: flex; gap: 8px; margin-bottom: 10px; }
+    button { flex: 1; padding: 9px; background: #4f46e5; border: none; border-radius: 8px; color: white; font-weight: 600; font-size: 12px; cursor: pointer; transition: 0.15s; }
+    button:hover { background: #4338ca; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    
+    /* Embedded Drag and Drop Box */
+    .dropbox {
+      border: 2px dashed rgba(99, 102, 241, 0.4);
+      background: rgba(15, 23, 42, 0.6);
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+      cursor: pointer;
+      margin-bottom: 10px;
+      transition: all 0.2s ease;
+    }
+    .dropbox:hover, .dropbox.dragover {
+      border-color: #6366f1;
+      background: rgba(99, 102, 241, 0.15);
+    }
+    .dropbox p { margin: 0; font-size: 11px; color: #cbd5e1; font-weight: 500; }
+    .dropbox small { font-size: 9px; color: #64748b; }
+
+    .tabs { display: flex; gap: 6px; margin-bottom: 8px; font-size: 11px; }
+    .tab-btn { background: #1e293b; border: 1px solid #334155; color: #94a3b8; padding: 3px 8px; border-radius: 6px; cursor: pointer; flex: initial; }
+    .tab-btn.active { background: rgba(99, 102, 241, 0.3); color: #c7d2fe; border-color: #6366f1; }
+    
+    .gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; max-height: 240px; min-height: 140px; overflow-y: auto; margin-bottom: 10px; padding: 2px; }
+    .card { position: relative; aspect-ratio: 1; border-radius: 8px; overflow: hidden; background: #0f172a; border: 2px solid #1e293b; cursor: pointer; }
+    .card.selected { border-color: #6366f1; box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.4); }
+    .card img { width: 100%; height: 100%; object-fit: cover; }
+    .card .tag { position: absolute; top: 3px; left: 3px; background: rgba(0,0,0,0.75); color: #cbd5e1; font-size: 8px; padding: 1px 4px; border-radius: 3px; font-family: monospace; font-weight: bold; }
+    .card .drop-tag { position: absolute; top: 3px; right: 3px; background: #4f46e5; color: white; font-size: 7px; padding: 1px 3px; border-radius: 3px; font-weight: bold; }
+    
+    .empty-state { grid-column: span 3; text-align: center; color: #64748b; font-size: 11px; padding: 24px 8px; }
+    .footer { display: flex; gap: 6px; align-items: center; }
+    select { flex: 1; padding: 8px; border-radius: 8px; background: #0f172a; color: white; border: 1px solid #334155; font-size: 11px; }
+    .status-msg { font-size: 11px; color: #94a3b8; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  </style>
+</head>
+<body>
+  <h1>
+    <span class="brand">⚡ PixelShift</span>
+    <span class="badge">Manifest V3</span>
+  </h1>
+
+  <div class="btn-row">
+    <button id="scanBtn">🔍 Scan Page Images</button>
+  </div>
+
+  <!-- Embedded Drag & Drop Box -->
+  <div id="dropBox" class="dropbox">
+    <input type="file" id="fileInput" multiple accept="image/*,.jpg,.jpeg,.png,.webp,.svg,.gif,.bmp,.ico,.avif" style="display: none;" />
+    <p>📁 Drag &amp; drop images here or <span style="color: #818cf8; text-decoration: underline;">browse</span></p>
+    <small>Supports JPG, PNG, WebP, SVG, GIF, BMP, ICO, AVIF &amp; Paste (Ctrl+V)</small>
+  </div>
+
+  <div id="status" class="status-msg">Click "Scan Page Images" or drop images above.</div>
+  
+  <div id="gallery" class="gallery">
+    <div class="empty-state">No images loaded yet.<br/>Scan active webpage or drop images above.</div>
+  </div>
+
+  <div class="footer">
+    <select id="formatSelect">
+      <option value="jpeg">Convert to JPG (.jpg)</option>
+      <option value="png">Convert to PNG (.png)</option>
+      <option value="webp">Convert to WebP (.webp)</option>
+      <option value="gif">Convert to GIF (.gif)</option>
+      <option value="svg">Convert to SVG (.svg)</option>
+      <option value="bmp">Convert to BMP (.bmp)</option>
+      <option value="ico">Convert to ICO (.ico)</option>
+    </select>
+    <button id="convertBtn">Download</button>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
