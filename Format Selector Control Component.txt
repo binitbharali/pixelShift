@@ -1,0 +1,68 @@
+import React from 'react';
+import { SupportedFormat } from '../types';
+import { FORMAT_REGISTRY, getFormatInfo, isFormatSupportedByBrowser } from '../utils/formatManager';
+
+interface FormatSelectorProps {
+  selectedFormat: SupportedFormat;
+  onChange: (format: SupportedFormat) => void;
+  className?: string;
+  showAll?: boolean;
+}
+
+export const FormatSelector: React.FC<FormatSelectorProps> = ({
+  selectedFormat,
+  onChange,
+  className = '',
+  showAll = true,
+}) => {
+  const allFormats: SupportedFormat[] = showAll
+    ? ['png', 'jpeg', 'webp', 'svg', 'ico', 'bmp', 'gif', 'avif']
+    : ['png', 'jpeg', 'webp', 'svg'];
+
+  const currentDef = getFormatInfo(selectedFormat);
+
+  return (
+    <div className={`flex flex-col gap-2 ${className}`}>
+      <div className="flex items-center justify-between">
+        <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
+          Target Format
+        </label>
+        <span className={`text-[10px] px-2 py-0.5 rounded border font-mono ${currentDef.badgeColor}`}>
+          {currentDef.label} {currentDef.isVector ? '• Vector' : '• Raster'}
+        </span>
+      </div>
+
+      <div className="grid grid-cols-4 gap-1.5 sm:grid-cols-8">
+        {allFormats.map((fmt) => {
+          const info = FORMAT_REGISTRY[fmt];
+          const isSelected = selectedFormat === fmt;
+          const isSupported = isFormatSupportedByBrowser(fmt);
+
+          return (
+            <button
+              key={fmt}
+              type="button"
+              disabled={!isSupported}
+              onClick={() => onChange(fmt)}
+              className={`flex flex-col items-center justify-center py-2 px-1 rounded-lg text-xs font-medium transition-all ${
+                isSelected
+                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30 ring-2 ring-indigo-400'
+                  : isSupported
+                  ? 'bg-slate-800/80 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700/60'
+                  : 'bg-slate-900/40 text-slate-600 border border-slate-800/40 cursor-not-allowed'
+              }`}
+              title={isSupported ? info.description : 'Not supported by this browser'}
+            >
+              <span className="font-bold">{info.label}</span>
+              <span className="text-[9px] opacity-70 font-mono">.{info.extension}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      <p className="text-[11px] text-slate-400 mt-1">
+        <strong className="text-slate-200">{currentDef.label}:</strong> {currentDef.description}
+      </p>
+    </div>
+  );
+};
